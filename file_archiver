@@ -7,9 +7,9 @@ from os.path import isfile, join
 
 
 """File last modified 2 years ago"""
-LAST_MODIFIED = 0
+LAST_MODIFIED = 2
 """Archive files greater than the given size(in MB). IMPORTANT: if 0 then file size will be ignored"""
-FILE_SIZE = 1 #in MB
+FILE_SIZE = 100 #in MB
 SOURCE_DIR = r'C:\\TEST'
 ARCHIVE_DIR = r'D:\\ARCHIVE'
 
