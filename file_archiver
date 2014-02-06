@@ -1,0 +1,89 @@
+#!/usr/bin/env python
+from os import listdir, stat
+import shutil
+import datetime
+import time
+from os.path import isfile, join
+
+
+"""File last modified 2 years ago"""
+LAST_MODIFIED = 0
+"""Archive files greater than the given size(in MB). IMPORTANT: if 0 then file size will be ignored"""
+FILE_SIZE = 1 #in MB
+SOURCE_DIR = r'C:\\TEST'
+ARCHIVE_DIR = r'D:\\ARCHIVE'
+
+
+DATE_FORMAT = '%a %b %d %H:%M:%S %Y'
+
+files = []
+
+
+class FileObject:
+    _size = 0
+
+    def __init__(self, name='', size=0, modified=None, full_path=''):
+        self.name = name
+        self._size = size
+        self.modified = modified
+        self.full_path = full_path
+
+    @property
+    def size(self):
+        return self._size/1024/1024 #in MB
+
+
+    @size.setter
+    def size(self, value):
+        self._size = value
+
+    def __cmp__(self, other):
+        if hasattr(other, 'size'):
+            return self.size.__cmp__(other.size)
+
+
+def read_file(path=''):
+    for f in listdir(path):
+        try:
+            if isfile(join(path, f)):
+                files.append(FileObject(name=f,
+                                        size=stat(join(path, f)).st_size,
+                                        modified=time.ctime(stat(join(path, f)).st_mtime),
+                                        full_path=join(path, f)))
+            else:
+                read_file(join(path, f))
+        except Exception as ex:
+            pass
+
+    return files
+
+
+def move_file(source, destination):
+    """Could write to a log to keep track"""
+    shutil.move(source, destination)
+
+
+def process_files(path):
+    try:
+        files = read_file(path)
+        if len(files) == 0:
+            pass
+
+        today = datetime.datetime.today()
+        old_files = [f for f in files if (True if FILE_SIZE == 0 else f.size >= FILE_SIZE) and datetime.datetime.strptime(f.modified, DATE_FORMAT) < today.replace(today.year - LAST_MODIFIED)]
+
+        total_mb_saved = 0
+
+        for f in sorted(old_files, reverse=True):
+            total_mb_saved += f.size
+            move_file(f.full_path, r'%s\\%s' % (ARCHIVE_DIR, f.name))
+            print f.full_path
+
+        print '%s file(s) moved and %i MB saved!' % (str(len(old_files)), total_mb_saved)
+    except Exception as ex:
+        print ex.message
+        print 'Unable to move files!'
+
+
+"""Sample execution"""
+process_files(r'C:\\test')
