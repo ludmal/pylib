@@ -45,3 +45,4 @@ Create a mail message and send the email
     send(mail_msg=msg, mail_server=server, template=temp)
 
 
+Follow me on Twitter @ludmal
