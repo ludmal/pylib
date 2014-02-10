@@ -23,14 +23,15 @@ Create a TEXT/HTML file with the Keys as below
 Step 2:
 ----------------------------
 Create a template passing the values to replace with the keys in template
-
+  '''
   values = {}
   values['username'] = 'Ludmal de silva!'
   values['from'] = 'The Team'
   values['url'] = 'http://www.ludmal.com'
   
   temp = EmailTemplate(template_name='welcome.txt', values=values)
-
+  '''
+  
 Step 3:
 -----------------------------
 Create a Mail Server 
