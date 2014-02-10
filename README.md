@@ -34,6 +34,7 @@ Create a template passing the values to replace with the keys in template
 Step 3:
 -----------------------------
 Create a Mail Server 
+
     server = MailServer(server_name='smtp.gmail.com', username='<username>', password='<password>', port=0,   require_starttls=True)
 
 Step 4:
