@@ -1,4 +1,4 @@
-pylib
+pylib - email sender, html parser, tf-idf, image extracter
 =====
 
 python library for useful tools
