@@ -1,6 +1,8 @@
 __author__ = 'Ludmal.DESILVA'
 
 import os, email, smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 path = os.path.dirname(__file__)
 #modify this to change the Template Directory
@@ -25,11 +27,12 @@ class EmailTemplate():
 class MailMessage(object):
     html = False
 
-    def __init__(self, from_email='', to_emails=[], cc_emails=[], subject='', body=''):
+    def __init__(self, from_email='', to_emails=[], cc_emails=[], subject='', body='', template=None):
         self.from_email = from_email
         self.to_emails = to_emails
         self.cc_emails = cc_emails
         self.subject = subject
+        self.template = template
         self.body = body
 
     def get_message(self):
@@ -40,15 +43,25 @@ class MailMessage(object):
             self.cc_emails = [self.cc_emails]
 
         if len(self.to_emails) == 0 or self.from_email == '':
-            raise Exception('Invalid From or To email address(es)')
+            raise ValueError('Invalid From or To email address(es)')
 
-        msg = email.Message.Message()
+        msg = MIMEMultipart('alternative')
         msg['To'] = ', '.join(self.to_emails)
         msg['Cc'] = ', '.join(self.cc_emails)
         msg['From'] = self.from_email
-        msg['subject'] = self.subject
-        #TODO - Add HTML/TEXT support to the Body
-        msg.set_payload(self.body)
+        msg['Subject'] = self.subject
+        if self.template:
+            #If the template is html, attach and set MIME
+            if self.template.html:
+                #Attach plain text, which will be used if a template cannot render
+                #The last attached element will always take precedence (according to RFC2046)
+                msg.attach(MIMEText(self.body, 'plain'))
+                msg.attach(MIMEText(self.template.render(),'html'))
+            #Otherwise, attach plaintext template
+            else:
+                msg.attach(MIMEText(self.template.render(),'plain'))
+        else:
+                msg.attach(MIMEText(self.body, 'plain'))
         return msg
 
 
@@ -63,14 +76,11 @@ class MailServer(object):
         self.require_starttls = require_starttls
 
 
-def send(mail_msg, mail_server=MailServer(), template=None):
+def send(mail_msg, mail_server=MailServer()):
     server = smtplib.SMTP(mail_server.server_name, 587)
     if mail_server.require_starttls:
         server.starttls()
     server.login(mail_server.username, mail_server.password)
-    if template:
-        mail_msg.body = template.render()
-        mail_msg.html = template.html
-    server.sendmail(mail_msg.from_email, ', '.join(mail_msg.to_emails), mail_msg.get_message().as_string())
+    server.sendmail(mail_msg.from_email, mail_msg.to_emails, mail_msg.get_message().as_string())
     server.close()
 
