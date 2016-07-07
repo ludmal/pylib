@@ -81,6 +81,6 @@ def send(mail_msg, mail_server=MailServer()):
     if mail_server.require_starttls:
         server.starttls()
     server.login(mail_server.username, mail_server.password)
-    server.sendmail(mail_msg.from_email, mail_msg.to_emails, mail_msg.get_message().as_string())
+    server.sendmail(mail_msg.from_email, (mail_msg.to_emails + mail_msg.cc_emails), mail_msg.get_message().as_string())
     server.close()
 
