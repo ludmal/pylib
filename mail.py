@@ -68,7 +68,7 @@ class MailMessage(object):
 class MailServer(object):
     msg = None
 
-    def __init__(self, server_name='smtp.gmail.com', username='<username>', password='<password>', port=0, require_starttls=True):
+    def __init__(self, server_name='smtp.gmail.com', username='<username>', password='<password>', port=587, require_starttls=True):
         self.server_name = server_name
         self.username = username
         self.password = password
@@ -77,10 +77,11 @@ class MailServer(object):
 
 
 def send(mail_msg, mail_server=MailServer()):
-    server = smtplib.SMTP(mail_server.server_name, 587)
+    server = smtplib.SMTP(mail_server.server_name, mail_server.port)
     if mail_server.require_starttls:
         server.starttls()
-    server.login(mail_server.username, mail_server.password)
+    if mail_server.username:
+        server.login(mail_server.username, mail_server.password)
     server.sendmail(mail_msg.from_email, (mail_msg.to_emails + mail_msg.cc_emails), mail_msg.get_message().as_string())
     server.close()
 
